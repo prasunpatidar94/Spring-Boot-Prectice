@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html  
+    xmlns:th="http://www.thymeleaf.org" 
+    >
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>************This is the registration page ************</h3>
+	<form th:action="@{/save}" method="post">
+	
+	<pre>
+		NAME       :  <input type="text" name="name">
+		EMAIL      :  <input type="text" name="email">
+		PASSWORD   :  <input type="password" name="password">
+		ROLE       :  
+					  <input type="checkbox" name="roles" value="EMPLOYEE">  EMPLOYEE
+					  <input type="checkbox" name="roles" value="ADMIN">ADMIN
+					  
+					  <input type="submit" name="" value="ADD USER">
+		
+		 
+	</pre>
+
+<span th:text="${massage}"></span>
+	<a th:href="@{/logout}">Logout</a>
+
+
+	</form>
+
+</body>
+</html>

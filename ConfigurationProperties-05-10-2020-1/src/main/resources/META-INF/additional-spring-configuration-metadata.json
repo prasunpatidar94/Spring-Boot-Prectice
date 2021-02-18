@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "emp.data.id",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.id'"
+  },
+  {
+    "name": "emp.data.name",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.name'"
+  },
+  {
+    "name": "emp.data.city",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.city'"
+  },
+  {
+    "name": "emp.data.List[0]",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.List[0]'"
+  }
+]}

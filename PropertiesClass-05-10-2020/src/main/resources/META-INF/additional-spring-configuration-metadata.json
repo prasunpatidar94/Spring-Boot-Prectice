@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "emp.data.emp.id",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.emp.id'"
+  },
+  {
+    "name": "emp.data.emp.name",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.emp.name'"
+  },
+  {
+    "name": "emp.data.emp.city",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.emp.city'"
+  },
+  {
+    "name": "emp.data.em.name",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.em.name'"
+  },
+  {
+    "name": "emp.data.em.id",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.em.id'"
+  },
+  {
+    "name": "emp.data.em.city",
+    "type": "java.lang.String",
+    "description": "A description for 'emp.data.em.city'"
+  }
+]}

@@ -1,0 +1,220 @@
+				Spring Boot-Security
+				    Session-4
+                                    Mr. RAGHU
+				-------------------
+				Spring JDBC - Database
+			https://www.facebook.com/groups/thejavatemple
+
+*) Spring Security using JDBC-Authentication:-
+  In this case we store user data inside databae tables.
+  Data like username,password,role,enabled.
+
+
+PasswordEncoder(I):- It is used to convert password from readable format to unreadable
+                    format (encode).
+
+--Test.java---
+package in.nareshit.raghu;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+public class Test {
+
+	public static void main(String[] args) {
+		BCryptPasswordEncoder enc = new BCryptPasswordEncoder();
+		String ep = enc.encode("syed");
+		System.out.println(ep);
+	}
+}
+--------------------------------
+
+
+  user   pwd
+  sam    sam ($2a$10$JdUrYEJD2oLUpYMuxQFblumLHWcv9FuEqwHuuM4b.GcC52OfmbU0q)
+  ajay   ajay ($2a$10$/ZUzr308.OqqgMQZWZm6EOPwU5q4Vr4ARteyQrRtl269T0VjWsKi2)
+  syed   syed ($2a$10$6HO2ZqBTgnziQn0v.etN8OO/1.UzpymOPgo.mrj6l4qn/yoGDomXy)
+
+===============================================================================
+S#1 Create one database table for users data
+
+S#2 INSERT rows (un,pwd,role,enabled)
+
+S#3 Define two SQLs (used in security)
+   SQL#1 fetch un,pwd,enabled using un
+   SQL#2 fetch un,role using un
+
+
+S#4 Add Extra Dependnecies  : spring-jdbc and database(mysql-connector/ojdbc..)
+
+S#5 Provide datasource (connection properties)
+spring.datasource.driver-class-name=
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+
+S#6 Provide Configuration for AuthenticationManager 
+   by providing SQL#1 for user data, SQL#2 for roles data,
+   datasource and PasswordEncoder
+
+	auth.jdbcAuthentication()
+		.dataSource(____)
+		.usersByUsernameQuery("SQL#1")
+		.authoritiesByUsernameQuery("SQL#2")
+		.passwordEncoder(___);
+
+
+*) Define PasswordEncoder as AppConfig (@Configuration and @Bean)
+
+
+=============Full Code=======================================================
+MySQL DB Commands:
+
+mysql> create database bootsecure;
+
+mysql> use bootsecure; 
+
+mysql> create table usertab (uid int, uname varchar(30),upwd varchar(70), urole varchar(20), uenabled int);
+
+mysql> desc usertab;
+
+INSERT INTO usertab values(10,'sam','$2a$10$JdUrYEJD2oLUpYMuxQFblumLHWcv9FuEqwHuuM4b.GcC52OfmbU0q','ADMIN',1);
+INSERT INTO usertab values(11,'ajay','$2a$10$/ZUzr308.OqqgMQZWZm6EOPwU5q4Vr4ARteyQrRtl269T0VjWsKi2','EMPLOYEE',1);
+INSERT INTO usertab values(11,'syed','$2a$10$6HO2ZqBTgnziQn0v.etN8OO/1.UzpymOPgo.mrj6l4qn/yoGDomXy','STUDENT',1);
+
+mysql> selct * from usertab;
+
+SQL#1 Fetch username,password,enabled using username ;
+
+select uname,upwd,uenabled from usertab where uname=?;
+
+SQL#2 Fetch username,role using username;
+
+select uname,urole from usertab where uname=?;
+
+===================================================================
+1. Create Spring Starter Project
+Name: SpringBoot2SecurityJdbcAuthEx
+Dep : Web, Thymeleaf, spring security, jdbc, mysql, devtools
+
+pom.xml
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+
+2. Controller class and UI Pages (same as before example)
+
+3. application.properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/bootsecure
+spring.datasource.username=root
+spring.datasource.password=root
+
+4. AppConfig 
+
+package in.nareshit.raghu.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+@Configuration
+public class AppConfig {
+	
+	@Bean
+	public BCryptPasswordEncoder encoder() {
+		return new BCryptPasswordEncoder();
+	}
+}
+
+5. SecurityConfig ***
+package in.nareshit.raghu.config;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	@Autowired
+	private DataSource dataSource;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
+	
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.jdbcAuthentication()
+		//creates database connection
+		.dataSource(dataSource)
+		//fetch un,pwd,enabled using username input entered in Login page
+		.usersByUsernameQuery("select uname,upwd,uenabled from usertab where uname=?")
+		//fetch un,role using username input entered in Login page
+		.authoritiesByUsernameQuery("select uname,urole from usertab where uname=?")
+		//prvide password encoder object reference
+		.passwordEncoder(passwordEncoder);
+	}
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.authorizeRequests()
+		.antMatchers("/home").permitAll()
+		.antMatchers("/welcome").authenticated()
+		.antMatchers("/admin").hasAuthority("ADMIN")
+		.antMatchers("/emp").hasAuthority("EMPLOYEE")
+		.antMatchers("/std").hasAuthority("STUDENT")
+		.anyRequest().authenticated()
+		
+		.and()
+		.formLogin()
+		.defaultSuccessUrl("/welcome",true)
+		
+		.and()
+		.logout()
+		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+		
+		.and()
+		.exceptionHandling()
+		.accessDeniedPage("/denied")
+		;
+		
+	}
+	
+}
