@@ -1,0 +1,19 @@
+my:
+  app:
+    data: dev
+    info-data: devsystem
+---
+spring:
+  profiles: qa
+my:
+  app:
+    data: qanew
+    info-data: qasystemnew
+   
+---
+spring:
+  profiles: pro
+my:
+  app:
+    data: pro
+    info-data: prosystem

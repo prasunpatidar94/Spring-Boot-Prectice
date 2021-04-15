@@ -1,0 +1,204 @@
+				Spring Boot - Security
+				    Session-3
+				    Mr. RAGHU
+				---------------------
+		https://www.facebook.com/groups/thejavatemple
+
+*) InMemory (RAM) AuthenticationManager:- Dev/Test
+
+     ------------------------RAM-------------------------
+     |   username     |  password     |   authorities   |
+     ----------------------------------------------------
+     |    sam         |    sam        |   ADMIN         |
+     |    syed        |    syed       |   EMPLOYEE      |
+     |    jai         |    jai        |   STUDENT       |
+     ----------------------------------------------------
+
+*) Ex: HomeController (class)
+ -------------------------------------------------------------------
+    URL                      UI                       Access Details
+ -------------------------------------------------------------------
+   /home                  HomePage.html       (permitAll)every one can access
+   /welcome               WelcomePage.html    (authenticated) only login users
+						[No Role required]
+   /admin                 AdminPage.html      (hasAuthority[ADMIN]) login + role-ADMIN
+   /emp                   EmployeePage.html   (hasAuthority[EMPLOYEE]) login + role-EMPLOYEE
+   /std                   StudentPage.html    (hasAuthority[STUDENT]) login + role-STUDENT
+
+==================================================================================
+code
+1. Name : SpringBootSecurityInMemoryAuth
+   Dep  : Spring web,  Spring Security, DevTools, thymeleaf
+
+2. Controller class
+package in.nareshit.raghu.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class HomeController {
+
+	@GetMapping("/home")
+	public String showHome() {
+		return "HomePage";
+	}
+	
+	@GetMapping("/welcome")
+	public String showWelcome() {
+		return "WelcomePage";
+	}
+	
+	@GetMapping("/admin")
+	public String showAdmin() {
+		return "AdminPage";
+	}
+	
+	@GetMapping("/emp")
+	public String showEmp() {
+		return "EmployeePage";
+	}
+	
+	@GetMapping("/std")
+	public String showStd() {
+		return "StudentPage";
+	}
+	
+	@GetMapping("/denied")
+	public String showDenied() {
+		return "DeniedPage";
+	}
+	
+}
+
+3. UI Pages:
+
+HomePage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>WELCOME TO HOME PAGE(NO SECURITY)</h3>
+</body>
+</html>
+
+WelcomePage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>WELCOME PAGE AFTER LOGIN SUCCESS</h3>
+<a th:href="@{/logout}">LOGOUT</a>
+</body>
+</html>
+
+AdminPage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>ADMIN PAGE ONLY</h3>
+<a th:href="@{/logout}">LOGOUT</a>
+</body>
+</html>
+
+EmployeePage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>EMPLOYEE PAGE ONLY</h3>
+<a th:href="@{/logout}">LOGOUT</a>
+</body>
+</html>
+
+StudentPage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>STUDENT PAGE ONLY</h3>
+<a th:href="@{/logout}">LOGOUT</a>
+</body>
+</html>
+
+DeniedPage.html
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org/">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>NO ACCESS PROVIDE TO YOU, PLEASE GOTO WELCOME</h3>
+<a th:href="@{/welcome}">WELCOME</a> |
+<a th:href="@{/logout}">LOGOUT</a>
+</body>
+</html>
+
+*) SecurityConfig.java
+package in.nareshit.raghu.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+@EnableWebSecurity
+@Configuration
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.inMemoryAuthentication().withUser("sam").password("{noop}sam").authorities("ADMIN");
+		auth.inMemoryAuthentication().withUser("syed").password("{noop}syed").authorities("EMPLOYEE");
+		auth.inMemoryAuthentication().withUser("jai").password("{noop}jai").authorities("STUDENT");
+	}
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		//URL-AccessType
+		http.authorizeRequests()
+		.antMatchers("/home").permitAll()
+		.antMatchers("/welcome").authenticated()
+		.antMatchers("/admin").hasAuthority("ADMIN")
+		.antMatchers("/emp").hasAuthority("EMPLOYEE")
+		.antMatchers("/std").hasAuthority("STUDENT")
+
+		//LoginForm Details
+		.and()
+		.formLogin()
+		.defaultSuccessUrl("/welcome", true)
+		
+		//Logout Details
+		.and()
+		.logout()
+		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+		
+		//exception Details
+		.and()
+		.exceptionHandling()
+		.accessDeniedPage("/denied")
+		;
+		
+	}
+	
+}
+==============================================================

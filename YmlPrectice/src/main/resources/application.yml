@@ -1,0 +1,32 @@
+<<<<<<< HEAD
+server:
+  port: 8585
+my:
+  app:
+    id: 101
+    name: prasun Patidar
+    city: kasrawad(P.M.)
+#   List
+    technologieslist-list:
+    - java
+    - python
+#   map
+    company-and-designation:
+      iteanz: siniour java developer
+      titan: java consultent
+      ibm: spring boot expert
+#     Object
+    address:
+      plotNo: 1000
+      landMark: ram mandir chok patidar mohhala
+      
+   
+ 
+=======
+server:  port: 8787
+my:
+  data:
+    form: default
+    id: 1000
+    name: Prasun form default---spring:  profiles: devmy:  data:    form: dev    id: 1000    name: Prasun form Dev---spring:  profiles: qaamy:  data:    form: qa    id: 1000    name: Prasun form qa
+>>>>>>> 4e95befaa9ece8c6f76985a773c5e492e1d11e00

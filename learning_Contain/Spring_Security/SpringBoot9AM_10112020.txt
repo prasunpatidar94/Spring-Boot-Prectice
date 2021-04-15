@@ -1,0 +1,110 @@
+				Spring Boot - Security
+				     Session-II
+				     Mr. RAGHU
+				--------------------
+					JAAS
+
+*)AuthenticationManager:-
+InMemory (RAM) AuthenticationManager
+JDBC (DB/SQL) AuthenticationManager
+UserDetailsService(ORM)AuthenticationManager
+
+*) InMemory (RAM) AuthenticationManager:- Dev/Test
+
+     ------------------------RAM-------------------------
+     |   username     |  password     |   authorities   |
+     ----------------------------------------------------
+     |    sam         |    sam        |   ADMIN         |
+     |    syed        |    syed       |   EMPLOYEE      |
+     |    jai         |    jai        |   STUDENT       |
+     ----------------------------------------------------
+
+
+--Example code---
+auth.inMemoryAuthentication().withUser("sam").password("{noop}sam").authorities("ADMIN");
+auth.inMemoryAuthentication().withUser("syed").password("{noop}syed").authorities("EMPLOYEE");
+auth.inMemoryAuthentication().withUser("jai").password("{noop}jai").authorities("STUDENT");
+
+*) Ex: HomeController (class)
+ -------------------------------------------------------------------
+    URL                      UI                       Access Details
+ -------------------------------------------------------------------
+   /home                  HomePage.html       (permitAll)every one can access
+   /welcome               WelcomePage.html    (authenticated) only login users
+						[No Role required]
+   /admin                 AdminPage.html      (hasAuthority[ADMIN]) login + role-ADMIN
+   /emp                   EmployeePage.html   (hasAuthority[EMPLOYEE]) login + role-EMPLOYEE
+   /std                   StudentPage.html    (hasAuthority[STUDENT]) login + role-STUDENT
+
+
+*) antMatchers(path) : This method is used to match(compare) request URL(Path)
+   with Controller#method URL(path), if they are matched then its connected
+   authority type [permitAll()/authenticated()/hasAuthority()] is selected.
+
+---Examples---------------
+1. /register can be accessed by every one 
+
+.antMatchers("/register").permitAll()
+
+2. /inbox can be accessed by User after login (any role is fine)
+
+.antMatchers("/inbox").authenticated()
+
+3. /exportData can be accessed by User after login having role - ADMIN
+
+.antMatchers("/exportData").hasAuthority("ADMIN")
+
+4. /import  can be accessed by User after login having role - (any one of) ADMIN, EMPLOYEE, STUDENT
+
+.antMatchers("/import").hasAnyAuthority("ADMIN","EMPLOYEE","STUDENT")
+
+5. /login with GET type can be accessed by every one
+
+.antMatchers(HttpMethod.GET, "/login").permitAll()
+
+6. /save with POST type can be accessed by any user after login (any role is fine)
+
+.antMatchers(HttpMethod.POST,"/save").authenticated()
+
+-----------------------------------------------------------------
+anyRequest():-
+ It indicates non-configured URLs  which are in Application(Controller paths)
+ (ie antMatchers not provided URLs).
+
+Consider Example: Project has 5 URLs at Controller method level.
+URLs(paths) : /show, /save, /export, /delete, /import
+
+
+.antMatchers("/show").permitAll()
+.antMatchers("/export").permitAll()
+.antMatchers("/save").hasAuthority("ADMIN")
+.anyRequest().authenticated()
+
+Her .anyRequest() indicates /delete and /import URLs which can be configured using
+ any access type [permitAll()/authenticated()/hasAuthority(T)].
+
+
+sample code:
+		http.authorizeRequests()
+		.antMatchers("/home").permitAll()
+		.antMatchers("/welcome").authenticated()
+		.antMatchers("/admin").hasAuthority("ADMIN")
+		.antMatchers("/emp").hasAuthority("EMPLOYEE")
+		.antMatchers("/std").hasAuthority("STUDENT")
+		.anyRequest().authenticated()
+		
+		//Login Form Details
+		.and()
+		.formLogin()
+		.defaultSuccessUrl("/welcome", true)
+		
+		//Logout Details
+		.and()
+		.logout()
+		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+		
+		// Exception Details
+		.and()
+		.exceptionHandling()
+		.accessDeniedPage("/denied")
+		;

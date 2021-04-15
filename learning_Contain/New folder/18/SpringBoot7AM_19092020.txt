@@ -1,0 +1,81 @@
+			Date : 19/09/2020
+			Spring Boot 7AM
+			 Mr. RAGHU
+	----------------------------------------
+Workspace Links:
+http://www.mediafire.com/file/ehxgbj1f18wkyvj/SpringBoot7AM_19022020.zip/file
+
+*) Child Profiles | Profiles Include:-
+ Properties file may have multiple keys based on Coding and Concepts added
+ ex: Email, Jpa, Security, MQ, Batch, Web, ...etc
+
+ After adding all key-val pairs into single properties file, its readablity is reduced.
+ So, we can better devided them into small/seperate properties files. Those are called
+ child profiles.
+
+ ex: Profile name : prod
+ File name : application-prod.properties
+                (n-keys)
+Child Profiles:
+   application-prodmail.properties   (in place f prodmail, we can write any word)
+   application-proddb.properties
+   application-prodjpa.properties
+   ...etc
+
+ All these childs are included with parent (inside application-prod.properties)
+   spring.profiles.include=prodmail,proddb,prodjpa
+
+*)Note: If same key is present in every properties file, then last combination
+  (last loaded) is considered. 
+
+---Example---
+1. Create Spring Starter Project
+ Name : SpringBoot2ProfilesIncludeTest
+ Dep  : Lombok
+
+2. application.properties (empty)
+
+3. application-prod.properties
+my.app.title=NIT
+my.app.ver=V2.1
+spring.profiles.include=proddb,prodmail
+
+application-proddb.properties
+my.app.driver=Oracle
+my.app.url=jdbc
+my.app.title=NIT-DB
+
+application-prodmail.properties
+my.app.host=Gmail
+my.app.port=587
+my.app.title=NIT-MAIL
+
+3. Runner
+package in.nareshit.raghu.runner;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import lombok.Data;
+
+@Component
+@Data
+@ConfigurationProperties(prefix = "my.app")
+public class ProfilesChildDataRunner implements CommandLineRunner {
+
+	private String title;
+	private String ver;
+	private String driver;
+	private String url;
+	private String host;
+	private String port;
+	
+	
+	@Override
+	public void run(String... args) throws Exception {
+		System.out.println(this);
+	}
+
+}
+------------------------------------------------------------
